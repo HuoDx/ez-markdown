@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Ez Markdown | Lightweight Markdown Editor</title>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        html,
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .editor-panel {
+            display: flex;
+            flex-direction: row;
+            padding: 4px;
+            width: 90vw;
+            height: 85vh;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        }
+
+        .editor,
+        .preview {
+            width: 50%;
+            height: 100%;
+        }
+
+        #text-input {
+            width: calc(100% - 32px);
+            height: calc(100% - 32px);
+            resize: none;
+            border-radius: 8px;
+            margin: 8px;
+            padding: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) inset, 0 1px 2px rgba(0, 0, 0, 0.24) inset;
+
+        }
+
+        #render-target {
+            width: calc(100% - 32px);
+            height: calc(100% - 32px);
+            border-radius: 8px;
+            margin: 8px;
+            padding: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) inset, 0 1px 2px rgba(0, 0, 0, 0.24) inset;
+            overflow: scroll;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container"><h1> My Markdown Editor</h1></div>
+    <div class="container">
+        <div class="editor-panel">
+            <div class="editor">
+                <textarea id="text-input"></textarea>
+            </div>
+            <div class="preview">
+                <div id="render-target"></div>
+            </div>
+        </div>
+    </div>
+    <footer class="container" style="margin-top: 1vh;">Code with ❤️ by HuoDx</footer>
+    <script>
+        function $(v) { return document.querySelector(v); }
+        function renderTitle(level, content) {
+            return `<h${level + 1}>${content}</h${level + 1}>`;
+        }
+        function renderBlock(content) {
+            let renderedBlock = '';
+            renderedBlock = content
+                .replaceAll('\n', '<br>')
+                .replaceAll(' ', '&nbsp')
+                .replaceAll(/(\*\*)(?<=\*\*).*(?=\*\*)(\*\*)/g, '<strong>·$&·</strong>')
+                .replaceAll(/(·\*\*)|(\*\*·)/g, '')
+
+                .replaceAll(/(\*)(?<=\*).*(?=\*)(\*)/g, '<em>·$&·</em>')
+                .replaceAll(/(·\*)|(\*·)/g, '')
+            return `<p>${renderedBlock}</p>`;
+        }
+        var renderedDom = '';
+        $('#text-input').addEventListener('keyup', (event) => {
+            renderedDom = '';
+            $('#text-input').value.split('\n\n').forEach((line) => {
+                let level = 0;
+                let isTitle = false;
+                while (level < line.length && line[level] == '#') {
+                    level++;
+                    isTitle = true;
+                }
+                if (isTitle) {
+                    let stop = line.indexOf('\n');
+                    renderedDom += renderTitle(level <= 6 ? level : 6, line.slice(level, stop > 0 ? stop : line.length));
+                } else renderedDom += renderBlock(line);
+            })
+            $('#render-target').innerHTML = renderedDom;
+        })
+    </script>
+
+</body>
+
+</html>
